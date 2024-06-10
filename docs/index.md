@@ -9,5 +9,5 @@ The following links will lead you to several detailed pacges:
 - [Cost estimation](cost_breakdown.md)
 - [Some other related links](links.md)
 
-<br><hr/> 
+<br><hr> 
 \>> Go to **[main repository](https://github.com/BastelBaus/Galaxy6D)**

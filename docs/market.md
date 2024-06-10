@@ -38,6 +38,6 @@ This page gives an overview on different DIY and professional products on the ma
 - [Dial V2 (5D)](https://www.hackster.io/ahmsville/ahmsville-dial-v2-a38b17)
 - [tams_printed_ft](https://github.com/TAMS-Group/tams_printed_ft)
 
-<br><hr/> 
+<br><hr> 
 \>> Back to  **[main page](index.md)** <br>
 \>> Go to **[main repository](https://github.com/BastelBaus/Galaxy6D)**

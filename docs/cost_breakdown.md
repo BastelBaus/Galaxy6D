@@ -16,6 +16,7 @@
 | working hours | 1000h+ | 0 | 0 | good that thigs is free !
 | **sum** | - | **<20€** | **<15€** | -
 
-<br><hr/> 
+<br><hr> 
 \>> Back to  **[main page](index.md)** <br>
 \>> Go to **[main repository](https://github.com/BastelBaus/Galaxy6D)**
+

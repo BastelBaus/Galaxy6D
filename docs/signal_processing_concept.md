@@ -35,5 +35,8 @@ We will use a Pythion toolbnox to implement the Kalman filter (see https://githu
 ## Adding angular rates to the Kalman filter 
 
 
+<br><hr> 
+\>> Back to  **[main page](index.md)** <br>
+\>> Go to **[main repository](https://github.com/BastelBaus/Galaxy6D)**
 
 
