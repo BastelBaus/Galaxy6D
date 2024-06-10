@@ -7,4 +7,4 @@
 
 <br><hr/> 
 \>> Back to  **[main page](index.md)** <br>
-\>> Go to **[main repository](https://github.com/BastelBaus/Simple6DSpaceKnob)**
+\>> Go to **[main repository](https://github.com/BastelBaus/Galaxy6D)**

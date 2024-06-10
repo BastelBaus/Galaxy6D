@@ -1,11 +1,12 @@
-# Simple6DSpaceKnob
+# Galaxy6D
 
-Simple DIY full 6D knob as input device (i.g. CAD, ...)
+Galaxy6D is a simple DIY full 6D knob based on magnetic sensors, permanent magnets and an inertial measurement unit which can be used as input device (i.g. CAD, ...).
 
+The following links will lead you to several detailed pacges:
 - [DIY and professional market overview](market.md)
-- [Initial design concept (V1)](concept_v1.md)
-- [Design concept (V2)](concept_v2.md)
+- [Design concepts](design_concept.md)
+- [Signal processing concept](signal_processing_concept.md)
 - [Cost estimation](cost_breakdown.md)
 
 <br><hr/> 
-\>> Go to **[main repository](https://github.com/BastelBaus/Simple6DSpaceKnob)**
+\>> Go to **[main repository](https://github.com/BastelBaus/Galaxy6D)**
