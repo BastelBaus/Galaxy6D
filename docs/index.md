@@ -7,6 +7,7 @@ The following links will lead you to several detailed pacges:
 - [Design concepts](design_concept.md)
 - [Signal processing concept](signal_processing_concept.md)
 - [Cost estimation](cost_breakdown.md)
+- [Some other related links](links.md)
 
 <br><hr/> 
 \>> Go to **[main repository](https://github.com/BastelBaus/Galaxy6D)**
