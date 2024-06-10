@@ -3,11 +3,15 @@ plugins:
 relative_links:
   enabled: true
   collections: true
-  
+
 # Base configuration
 exclude: [".rvmrc", ".rbenv-version", "README.md", "changelog.md"]
 #markdown: kramdown
-markdown: GFM
+#markdown: GFM
+markdown: kramdown
+kramdown:
+    math_engine: katex
+    
 highlighter: rouge
 permalink: pretty
 
