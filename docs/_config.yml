@@ -1,3 +1,9 @@
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true
+  
 # Base configuration
 exclude: [".rvmrc", ".rbenv-version", "README.md", "changelog.md"]
 #markdown: kramdown
@@ -22,5 +28,5 @@ collections:
     permalink: /:path/
 
 # Title
-name: Galaxy6D (1)
+name: Galaxy6D
 
