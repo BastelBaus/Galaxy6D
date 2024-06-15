@@ -3,6 +3,9 @@ import pathlib
 import pytest
 import numpy as np
 from unittest.mock import patch 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 from Galaxy6DLib import MagneticSensor
 
@@ -36,16 +39,16 @@ def test_calibration(datafiles):
                           [-0.014507,  2.149547,  0.022436],
                           [ 0.011303,  0.022436,  2.161512]])
 
-    print(f"Results for testfile {filename}")        
-    print("True  b:   ",b)        
-    print("Estim b:   ",ms.b.round(6))        
-    print("True  Ai:\n",Ai)        
-    print("Estim Ai:\n",ms.Ai.round(6))        
+    logger.info(f"Results for testfile {filename}")        
+    logger.info(f"True  b:   {b}")        
+    logger.info(f"Estim b:   {ms.b.round(6)}")        
+    logger.info(f"True  Ai:\n {Ai}")        
+    logger.info(f"Estim Ai:\n {ms.Ai.round(6)}")        
 
     #ms.plot()
 
-    #np.testing.assert_allclose(ms.b,b) 
-    #np.testing.assert_allclose(ms.Ai,Ai) 
+    np.testing.assert_allclose(ms.b,b,rtol=1e-3)     # actual versus desired
+    np.testing.assert_allclose(ms.Ai,Ai,rtol=1e-3) 
 
     assert(True)
     #assert inc(3) == 5
