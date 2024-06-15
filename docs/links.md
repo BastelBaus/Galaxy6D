@@ -5,6 +5,6 @@
 - [-"- windows version (old)](https://spacenav.sourceforge.net/spnav-win32.html)
 - [UI Study of 6D mouse with touch displays](https://bennylee.artstation.com/projects/L2mJPK)
 
-<br><hr/> 
+<br><hr> 
 \>> Back to  **[main page](index.md)** <br>
 \>> Go to **[main repository](https://github.com/BastelBaus/Galaxy6D)**
