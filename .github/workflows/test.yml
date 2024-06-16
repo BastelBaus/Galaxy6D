@@ -23,9 +23,8 @@ jobs:
         pip install -r requirements.txt
     - name: Test with pytest
       run: |
-        cd Galaxy6DLib
-        virtualenv -p python3 test-venv
-        test-venv/bin/pip install pytest pytest-cov pytest-datafiles
-        test-venv/bin/pytest --doctest-modules ---cov=. --cov-report=html
+        cd Galaxy6DLib        
+        pip install pytest pytest-cov pytest-datafiles
+        pytest --doctest-modules ---cov=. --cov-report=html
         # pytest tests.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
         
