@@ -3,17 +3,17 @@ Firmware
 Mechanics
 Electronics
 ConfigSoftware
+ConfigSoftware/.RefPositionData.txt
+
 SystemSimulation
 data
 other
-ConfigSoftware/.RefPositionData.txt
+
 
 **/__pycache__
 **/.pytest_cache
 **/*.egg-info
-
-# old stuff
-archive
+**/archive
 
 
 # Open Office
