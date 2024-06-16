@@ -11,6 +11,7 @@ from Galaxy6DLib import MagneticSensor
 
 # Dir containing 8 files
 FIXTURE_DIR = pathlib.Path(__file__).parent.resolve() / 'data'
+print("FixDirXXX:" FIXTURE_DIR )
 
 def inc(x):
     return x + 1
