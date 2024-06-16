@@ -5,7 +5,7 @@ sensors and an inertial measurement unit. Read full documentation including a
 market overview of existing devices on [github pages](https://bastelbaus.github.io/Galaxy6D/). 
 The project is in early ideation phase. Follow my log on [hackaday.io](https://hackaday.io/project/192855). 
 
-![Design Concept](docs/images/Concept_V2.png)
+![Design Concept](docs/images/Concept_V3.png)
 
 
 # Content 
