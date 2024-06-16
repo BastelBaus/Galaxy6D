@@ -1,13 +1,14 @@
 # temporary until they are managed
-Firmware
-Mechanics
-Electronics
-ConfigSoftware
+Firmware/*
+Mechanics/*
+SystemSimulation/*
+Electronics/*
+
+ConfigSoftware/*
 ConfigSoftware/.RefPositionData.txt
 
-SystemSimulation
-data
-other
+data/*
+other/*
 
 
 **/__pycache__
@@ -22,9 +23,6 @@ other
 
 # Prerequisites
 *.d
-
-
-
 
 # Compiled Object files
 *.slo
