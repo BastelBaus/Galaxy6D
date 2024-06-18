@@ -34,8 +34,8 @@ jobs:
     - name: Pytest coverage comment
       uses: MishaKav/pytest-coverage-comment@main
       with:
-        pytest-coverage-path: ./tests/pytest-coverage.txt
-        junitxml-path: ./tests/pytest.xml
+        pytest-coverage-path: Galaxy6DLib/tests/pytest-coverage.txt
+        junitxml-path: Galaxy6DLib/tests/pytest.xml
 
     - name: Check the output coverage
       run: |
