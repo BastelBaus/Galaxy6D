@@ -10,6 +10,8 @@ ConfigSoftware/.RefPositionData.txt
 data/*
 other/*
 
+VC_workspace.code-workspace
+
 
 **/__pycache__
 **/.pytest_cache

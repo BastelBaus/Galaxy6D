@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 import pickle
 import csv
+import scipy
 import numpy as np
 import matplotlib.pyplot as plt
-
 
 def meanLength(vec):
     ''' manLeangth returns the length of an 3x1 arrary or an list of nx3 arrays
@@ -102,6 +102,13 @@ class MagneticSensor:
                                         np.arctan2(self.dataCal[0], self.dataCal[2])*180/np.pi,
                                         np.arctan2(self.dataCal[1], self.dataCal[2])*180/np.pi ] )
 
+    def setAib(self,Ai,b):
+        self.Ai = AI
+        self.b  = b        
+        self.__applyCalibration()
+        self.calculateCalKPIs()                                                                                                       
+        if printStats: self.printStats()
+
     def calculateAll(self, targetField=1, method='minimize', printStats = True):
         ''' Estimates the calibration parameters, applies them and print statistics.
         '''
@@ -110,9 +117,7 @@ class MagneticSensor:
 
         self.estimateCalibration(targetField=targetField,method=method)
         self.__applyCalibration()
-
-        self.calculateCalKPIs()
-                                                                                                        
+        self.calculateCalKPIs()                                                                                                       
         if printStats: self.printStats()
     
     def loadRaw(self,filename):
@@ -186,7 +191,7 @@ class MagneticSensor:
         else: self.estimateCalibrationLiterature(targetField=targetField)
 
     def estimateCalibrationMinimize(self,targetField=1):
-        import scipy
+
         self.Ai = np.eye(3)
         self.b = np.zeros(3)
         self.targetField = targetField
@@ -443,7 +448,51 @@ class Galaxy6D:
         self.ms = [None,None,None]  # Magnetic Sensors Class
         self.rate = None
         self.acc  = None
-    
+
+    def estimateCalibration(self,targetField=1):
+
+        self.Ai = np.eye(3)
+        self.b = np.zeros(3)
+        self.targetField = targetField
+
+        def optfun(x,val):
+            
+            #logger.debug(f'get:{x.shape} val:{x} ' )
+            mm = np.mean(val,axis=1)
+            Ai = x[0:9].reshape(3,3)
+            b  = x[9:12]
+            dataCal = (val.T - (b + mm) ) @ Ai
+            ampCal = np.sqrt(np.sum(np.square(dataCal),axis=1))
+            err = np.sqrt(np.mean(np.square(ampCal-self.targetField )))
+            return err
+
+        x0 = np.concatenate( ( np.eye(3).reshape( (9,) ), np.zeros((3,))) )
+        logger.info(f'Optimize with start value size:{x0.shape} val:{x0} to target {self.targetField}' )
+        mm = np.mean(self.ms[0].dataRaw,axis=1)
+        mr = (np.max(self.ms[0].dataRaw,axis=1)-np.min(self.ms[0].dataRaw,axis=1))/2
+        relTol = 0.4; 
+        tol = [ ( mm[i] - relTol*mr[i]  , mm[i] + relTol*mr[i] ) for i in range(3) ]  
+        bnds = ( (None,None), (None,None), (None,None), \
+                 (None,None), (None,None), (None,None), \
+                 (None,None), (None,None), (None,None), \
+                  tol[0], tol[1], tol[2] )
+        res = scipy.optimize.minimize(optfun,x0, self.ms[0].dataRaw)
+
+        if res.success:
+            logger.info(f'Optimize successfully: {res.fun} @ {res.x.shape}' )
+            Ai = res.x[0:9].reshape(3,3)
+            b  = res.x[9:12] + mm
+            self.ms[0].setAib(Ai,b)
+        else:
+            logger.warning(f'Optimize failed: {res.message} \n >>> {res.x.shape} val:{res.x}' )
+
+        #TODO: Change to function, set Ai,b
+
+        
+        logger.info(f'New Calib Params:\nAi:\n{self.Ai.round(5)}\nb:{self.b.round(5)} ' )
+        
+
+        
     def loadFile(self,filename):
         ''' Load a file and stores '''
         result = [] 
