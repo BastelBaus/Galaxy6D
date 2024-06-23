@@ -445,7 +445,7 @@ class Galaxy6D:
         self.acc  = None
     
     def loadFile(self,filename):
-        ' Load a file and stores '
+        ''' Load a file and stores '''
         result = [] 
         timestamp =  []
         with open(filename, newline='') as csvfile:    
@@ -458,7 +458,7 @@ class Galaxy6D:
                 result.append(sensors)
                 timestamp.append(tm)
                 
-        result = np.asfarray(result)
+        result = np.np.asarray(result, dtype=np.float32)
         result = np.transpose(result)
         self.ms[0] = MagneticSensor(( result[ 0: 3]), self.MAG_SENS_LOW)
         self.ms[1] = MagneticSensor(( result[ 3: 6]), self.MAG_SENS_LOW)
