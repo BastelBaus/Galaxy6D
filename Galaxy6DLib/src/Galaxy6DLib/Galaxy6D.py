@@ -130,7 +130,7 @@ class MagneticSensor:
 
         n = len(result)
         logger.info(f'loaded {n} datalines')
-        if n>0: self.__setMeasurements( np.asfarray(result).T )
+        if n>0: self.__setMeasurements( np.asarray(result,dtype=np.float32).T )
             
     def saveRaw(self,filename="output.txt"):
         ''' Save magnetic field data to a file. Three tab seperate values 
@@ -466,7 +466,8 @@ class Galaxy6D:
         self.acc   = MagneticSensor(( result[ 9:12]) )
         self.rate  = MagneticSensor(( result[12:15]))
                 
-        timestamp = np.asfarray(timestamp) 
+        timestamp = np.np.asarray(timestamp, dtype=np.float32)
+        result = np.transpose(result)
         timestamp = timestamp- timestamp[0]
         self.ms[0].setTime(timestamp)
         self.ms[1].setTime(timestamp)
@@ -487,7 +488,7 @@ class Galaxy6D:
         self.ms[1] = MagneticSensor(( data[:,10:13].T), self.MAG_SENS_LOW)
         self.ms[2] = MagneticSensor(( data[:,13:16].T), self.MAG_SENS_LOW)
                 
-        timestamp = np.asfarray(data[:, 0]) 
+        timestamp = np.asarray(data[:, 0],dtype=np.float32) 
         timestamp = timestamp- timestamp[0]
         self.ms[0].setTime(timestamp)
         self.ms[1].setTime(timestamp)
