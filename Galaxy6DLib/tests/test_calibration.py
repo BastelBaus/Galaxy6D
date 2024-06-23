@@ -11,20 +11,18 @@ from Galaxy6DLib import MagneticSensor
 
 # Dir containing 8 files
 FIXTURE_DIR = pathlib.Path(__file__).parent.resolve() / 'data'
-print("FixDirXXX:",FIXTURE_DIR )
+#print("FixDirXXX:",FIXTURE_DIR )
 
-def inc(x):
-    return x + 1
 
 #@patch("matplotlib.pyplot.show")
-
 @pytest.mark.datafiles( FIXTURE_DIR / 'mag.txt',)
-def test_calibration(datafiles):
+@pytest.mark.parametrize("method", ['minimize','literature'])
+#def test_calibration(datafiles,method='literature'):
+def test_calibration(datafiles,method):
     filename = list(datafiles.iterdir())[0]
     ms = MagneticSensor()    
     ms.loadRaw(filename)
     
-    ms.estimateCalibration(targetField=0.54)
 
 
     # Magneto 1.2 results, normalized to 0.54 [same unit as measurement]
@@ -33,23 +31,15 @@ def test_calibration(datafiles):
                      [-0.016901,  0.915374,  0.003136],
                      [ 0.006229,  0.003136,  0.983337]])
     
-        
-    if 1==0:  # my test file results
-        b = np.asarray([0.049905, 0.128849, 0.044358]); 
-        Ai = np.asmatrix([[ 2.177104, -0.014507,  0.011303],
-                          [-0.014507,  2.149547,  0.022436],
-                          [ 0.011303,  0.022436,  2.161512]])
-
+    ms.estimateCalibration(targetField=0.54,method=method)
     logger.info(f"Results for testfile {filename}")        
-    logger.info(f"True  b:   {b}")        
-    logger.info(f"Estim b:   {ms.b.round(6)}")        
-    logger.info(f"True  Ai:\n {Ai}")        
-    logger.info(f"Estim Ai:\n {ms.Ai.round(6)}")        
+    logger.info(f" method: {method}")        
+    logger.info(f" True  b:   {b.round(3)}")        
+    logger.info(f" Estim b:   {ms.b.round(3)}")        
+    logger.info(f" True  Ai:\n {Ai.round(3)}")        
+    logger.info(f" Estim Ai:\n {ms.Ai.round(3)}")        
 
     #ms.plot()
 
-    #np.testing.assert_allclose(ms.b,b,rtol=1e-3)     # actual versus desired
-    #np.testing.assert_allclose(ms.Ai,Ai,rtol=1e-3) 
-
-    assert(True)
-    #assert inc(3) == 5
+    np.testing.assert_allclose(ms.b,b,rtol=1e0,atol=0.1)   # actual versus desired
+    np.testing.assert_allclose(ms.Ai,Ai,rtol=1e0,atol=0.1) # actual versus desired

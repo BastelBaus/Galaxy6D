@@ -12,7 +12,7 @@ Link: Magnetic Sensor Calibrataion Algorithms: https://www.ncbi.nlm.nih.gov/pmc/
 
 import logging 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+#logger.setLevel(logging.DEBUG)
 
 import pickle
 import csv
@@ -68,6 +68,7 @@ class MagneticSensor:
         self.meanFieldVec    = None   # mean magnetic field over the full measurement
         self.stdFieldVec     = None   # mean magnetic field over the full measurement
      
+        self.targetField = 1          #
         self.dataCal         = None   # the calibrated measurement data
         self.fieldVecCal     = None   # absolut length of vector, non calibrated
         self.rotVecCal       = None   # vector holding the 3 rotation angles
@@ -78,38 +79,46 @@ class MagneticSensor:
 
     def __setMeasurements(self,data,sensitivity=1):       
 
-        self.dataRaw = data[:,1000:]
+        logger.debug(f'set measurement with shape {data.shape} (sensitivity:{sensitivity})')
+        self.dataRaw = data
         self.n       = self.dataRaw.shape[1]
         self.s       = sensitivity
 
     def setTime(self,timestamps):
         self.tm = timestamps
 
-    def calculateAll(self, targetField=1, printStats = True):
-        ''' Estimates the calibration parameters, applies them and print statistics.
-        '''
-
+    def calculateRawKPIs(self):
         self.fieldVec  = np.sqrt( np.square(self.dataRaw[0]) + np.square(self.dataRaw[1]) + np.square(self.dataRaw[2]) )
         self.meanFieldVec = np.mean(self.fieldVec)
         self.stdFieldVec  = np.std(self.fieldVec)
         self.rotVec       = np.asarray( [ np.arctan2(self.dataRaw[0], self.dataRaw[1])*180/np.pi,
                                            np.arctan2(self.dataRaw[0], self.dataRaw[2])*180/np.pi,
                                            np.arctan2(self.dataRaw[1], self.dataRaw[2])*180/np.pi ] )
-
-        self.estimateCalibration(targetField)
-        self.applyCalibration()
-
+    def calculateCalKPIs(self):
         self.fieldVecCal  = np.sqrt( np.square(self.dataCal[0]) + np.square(self.dataCal[1]) + np.square(self.dataCal[2]) )
         self.meanFieldVecCal = np.mean( self.fieldVecCal )
         self.stdFieldVecCal  = np.std(self.fieldVecCal)
         self.rotVecCal = np.asarray( [ np.arctan2(self.dataCal[0], self.dataCal[1])*180/np.pi,
                                         np.arctan2(self.dataCal[0], self.dataCal[2])*180/np.pi,
                                         np.arctan2(self.dataCal[1], self.dataCal[2])*180/np.pi ] )
+
+    def calculateAll(self, targetField=1, method='minimize', printStats = True):
+        ''' Estimates the calibration parameters, applies them and print statistics.
+        '''
+
+        self.calculateRawKPIs()
+
+        self.estimateCalibration(targetField=targetField,method=method)
+        self.__applyCalibration()
+
+        self.calculateCalKPIs()
                                                                                                         
         if printStats: self.printStats()
     
     def loadRaw(self,filename):
-        ' Load a file and stores '
+        ''' Load magnetic field data from a file. Three tab seperate values 
+            for Bx,By and Bz.
+        '''
         logger.info(f'load data from {filename}')
         result = [] 
         with open(filename, newline='') as csvfile:    
@@ -117,51 +126,122 @@ class MagneticSensor:
             for i,row in enumerate(spamreader):
                 if len(row) != 3: continue
                 dat = [float(row[0]),float(row[1]),float(row[2])];
-                #print(i,":",dat)
                 result.append(dat)
-                
-        result = np.asfarray(result)
-        result = np.transpose(result)
-        self.__setMeasurements(result)
-        
+
+        n = len(result)
+        logger.info(f'loaded {n} datalines')
+        if n>0: self.__setMeasurements( np.asfarray(result).T )
+            
     def saveRaw(self,filename="output.txt"):
+        ''' Save magnetic field data to a file. Three tab seperate values 
+            for Bx,By and Bz.
+        '''
         with open(filename, "w") as text_file:
             for k in range(self.n):
-                print(f"{self.dataRaw[0][k]/self.s}\t"
-                      f"{self.dataRaw[1][k]/self.s}\t"
-                      f"{self.dataRaw[2][k]/self.s}\t", file=text_file)
+                row = f"{self.dataRaw[0][k]/self.s}\t{self.dataRaw[1][k]/self.s}\t{self.dataRaw[2][k]/self.s}"
+                print(row, file=text_file)
+
+    def getStatisticError(self):
+        ampCal = np.sqrt(np.sum(np.square(self.dataCal.T),axis=1))
+        err = np.sqrt(np.mean(np.square(ampCal-self.targetField )))
+        return err
+
 
         
     def printStats(self):
         print('------- Statistics -------')
-        print('sensitivity            :',self.s,' [LSB/GAUSS]')
-        print('samples                :',self.n)
-        print('mean field vector (raw):',np.round(self.meanFieldVec/self.s*1000)/1000,'GAUSS +/-',np.round(self.stdFieldVec/self.s*1000),'mGAUSS')
-        print('mean field vector (cal):',np.round(self.meanFieldVecCal/self.s*1000)/1000,'GAUSS +/-',np.round(self.stdFieldVecCal/self.s*1000),'mGAUSS')
-        
+        print('sensitivity       :',self.s,' [LSB/GAUSS]')
+        print('samples           :',self.n)
+        print('field vector (raw):',np.round(self.meanFieldVec/self.s*1000)/1000,'GAUSS +/-',np.round(self.stdFieldVec/self.s*1000),'mGAUSS')
+        print('field vector (cal):',np.round(self.meanFieldVecCal/self.s*1000)/1000,'GAUSS +/-',np.round(self.stdFieldVecCal/self.s*1000),'mGAUSS')
+        print('stat              :', self.getStatisticError())
+
     
-    def applyCalibration(self):
-        logger.info('Apply the calibration to the raw data')
-        self.dataCal = np.zeros(self.dataRaw.shape)
-        for k in range(self.n): # toDo as matrix
-            self.dataCal[0:3,k] = np.matmul(self.Ai, self.dataRaw[0:3,k] - self.b) / (self.meanFieldVec / self.s )
+    def __applyCalibration(self):
+        logger.info(f'Apply the calibration to the raw data. Sensitivity: {self.s}')
+        self.dataCal = ((self.dataRaw.T - self.b) @ self.Ai).T
+        logger.debug(f'done, new cal data shape: {self.dataCal.shape} ')
 
 
-    def estimateCalibration(self,targetField=1,debug=False):
-        # Implementation of calibration algo
-        # 
-        # References:
-        # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8401862/
-        # https://sites.google.com/view/sailboatinstruments1/d-implementation
-        # https://de.mathworks.com/matlabcentral/fileexchange/23377-ellipsoid-fitting
-        # https://github.com/millerlp/Rmagneto/blob/master/Rmagneto.c
-        # https://github.com/beattiea/TiltyIMU/blob/master/Tilty%20Software/Processing/Experiments/Testing%20Magnetometer%20calibration/ellipsoid_fit/ellipsoid_fit.m
-        # https://github.com/hightower70/MagCal
-        logger.info('Estimte the calibration parameter to optimaly solve the elyptic fit')
+        #self.dataCal[0:3,k] = np.matmul(self.Ai, self.dataRaw[0:3,k] - self.b) / (self.meanFieldVec / self.s )
+        #self.dataCal = ((self.dataRaw.T - self.b) @ self.Ai).T / (self.meanFieldVec / self.s )
+        #logger.info(f'Normalize {self.meanFieldVec} with sensitivity {self.s}')
+ 
 
-        debug = True
-        def dprint(*a):
-            if debug: print(*a)
+    def estimateCalibration(self,targetField=1,method='minimize'):
+        ''' estimateCalibration estiamtes offset (b) as well as 
+            scale and cross talk factors (Ai).
+
+            parmeters:
+                targetField: defines the taret amplitude of the 
+                        magnetic field (normalization)
+                        Default: 1
+                method: 'mimnimized' does a scipy minimization search 
+                        and any other parmeter does a elliptic optimization as given
+                        in literature
+                        Default ('minimize')
+        '''
+        self.method = method
+        if method=='minimize': self.estimateCalibrationMinimize(targetField=targetField)
+        else: self.estimateCalibrationLiterature(targetField=targetField)
+
+    def estimateCalibrationMinimize(self,targetField=1):
+        import scipy
+        self.Ai = np.eye(3)
+        self.b = np.zeros(3)
+        self.targetField = targetField
+
+        def optfun(x,val):
+            
+            #logger.debug(f'get:{x.shape} val:{x} ' )
+            mm = np.mean(val,axis=1)
+            Ai = x[0:9].reshape(3,3)
+            b  = x[9:12]
+            dataCal = (val.T - (b + mm) ) @ Ai
+            ampCal = np.sqrt(np.sum(np.square(dataCal),axis=1))
+            err = np.sqrt(np.mean(np.square(ampCal-self.targetField )))
+            return err
+
+        x0 = np.concatenate( ( np.eye(3).reshape( (9,) ), np.zeros((3,))) )
+        logger.info(f'Optimize with start value size:{x0.shape} val:{x0} to target {self.targetField}' )
+        mm = np.mean(self.dataRaw,axis=1)
+        mr = (np.max(self.dataRaw,axis=1)-np.min(self.dataRaw,axis=1))/2
+        relTol = 0.4; 
+        tol = [ ( mm[i] - relTol*mr[i]  , mm[i] + relTol*mr[i] ) for i in range(3) ]  
+        bnds = ( (None,None), (None,None), (None,None), \
+                 (None,None), (None,None), (None,None), \
+                 (None,None), (None,None), (None,None), \
+                  tol[0], tol[1], tol[2] )
+        #res = scipy.optimize.minimize(optfun,x0, self.dataRaw, bounds =bnds) #TODO: does not work, don'T know why
+        res = scipy.optimize.minimize(optfun,x0, self.dataRaw)
+
+        if res.success:
+            logger.info(f'Optimize successfully: {res.fun} @ {res.x.shape}' )
+            self.Ai = res.x[0:9].reshape(3,3)
+            self.b  = res.x[9:12] + mm
+        else:
+            logger.warning(f'Optimize failed: {res.message} \n >>> {res.x.shape} val:{res.x}' )
+
+        logger.info(f'New Calib Params:\nAi:\n{self.Ai.round(5)}\nb:{self.b.round(5)} ' )
+        
+
+
+    def estimateCalibrationLiterature(self,targetField=1):
+        ''' Implementation of calibration algo 
+         
+            References:
+            * https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8401862/
+            * https://sites.google.com/view/sailboatinstruments1/d-implementation
+            * https://de.mathworks.com/matlabcentral/fileexchange/23377-ellipsoid-fitting
+            * https://github.com/millerlp/Rmagneto/blob/master/Rmagneto.c
+            * https://github.com/beattiea/TiltyIMU/blob/master/Tilty%20Software/Processing/Experiments/Testing%20Magnetometer%20calibration/ellipsoid_fit/ellipsoid_fit.m
+            * https://github.com/hightower70/MagCal            
+        '''
+
+
+        logger.info('Estimate the calibration parameter to optimaly solve the elyptic fit')
+
+        self.targetField = targetField
 
         x = self.dataRaw[0]#/self.s
         y = self.dataRaw[1]#/self.s
@@ -257,7 +337,12 @@ class MagneticSensor:
         logger.debug(f"G:\n{G.round(3)}")
         logger.debug(f"Norm G:\n{nG.round(3)}")
         
-        self.Ai = comp  * ( targetField / nG * nDat ) 
+        self.Ai = comp  * ( targetField / nG * nDat )
+
+        # normalize results
+        mm = np.mean(np.sqrt(np.sum(np.square(self.dataRaw),axis=0)))
+        self.b  /= mm
+        self.Ai /= mm
 
         # final results
         logger.info(f"b  = {self.b}")
@@ -270,6 +355,9 @@ class MagneticSensor:
     def plot(self):
         from matplotlib.gridspec import GridSpec
  
+        # axis scaling
+        Bl = MagneticSensor.Blim
+
         # create objects
         #fig = plt.figure(figsize=plt.figaspect(1.))
         fig = plt.figure(constrained_layout=True)
@@ -277,81 +365,68 @@ class MagneticSensor:
         gs = GridSpec(2, 4, figure=fig)
  
         # create sub plots as grid
-        ax = [None,None,None,None,None,]
-        ax[0] = fig.add_subplot(gs[0:2,0:2])
-        ax[1] = fig.add_subplot(gs[0,2],projection='3d')
-        ax[2] = fig.add_subplot(gs[1,2])
-        ax[3] = fig.add_subplot(gs[0,3])
-        ax[4] = fig.add_subplot(gs[1,3])
+        ax = [None,None,None,None,None,None]
+        ax[0] = fig.add_subplot(gs[0,0:2])
+        ax[1] = fig.add_subplot(gs[1,0:2])
+        
+        ax[2] = fig.add_subplot(gs[0,2],projection='3d')
+        ax[3] = fig.add_subplot(gs[1,2])
+        ax[4] = fig.add_subplot(gs[0,3])
+        ax[5] = fig.add_subplot(gs[1,3])
  
 
-        self.plotTimeSignal(a1=ax[0])
 
-        
-        Bl = MagneticSensor.Blim
         # 3D figure 
-        ax[1].plot(self.dataRaw[0,:]/self.s,self.dataRaw[1,:]/self.s,self.dataRaw[2,:]/self.s,'r')
-        ax[1].plot(self.dataCal[0,:]/self.s,self.dataCal[1,:]/self.s,self.dataCal[2,:]/self.s,'g')
-        ax[1].set_xlim(-Bl,Bl)
-        ax[1].set_ylim(-Bl,Bl)
-        ax[1].set_zlim(-Bl,Bl)
-        ax[1].set_box_aspect([1.0, 1.0, 1.0])
-        ax[1].set_aspect('equal')
-        ax[1].set_proj_type('ortho')
-        
+        ax[2].plot(self.dataRaw[0,:]/self.s,self.dataRaw[1,:]/self.s,self.dataRaw[2,:]/self.s,'r',label='raw')
+        ax[2].plot(self.dataCal[0,:]/self.s,self.dataCal[1,:]/self.s,self.dataCal[2,:]/self.s,'g',label='cal')
+        ax[2].set_xlim(-Bl,Bl)
+        ax[2].set_ylim(-Bl,Bl)
+        ax[2].set_zlim(-Bl,Bl)
+        ax[2].set_box_aspect([1.0, 1.0, 1.0])
+        ax[2].set_aspect('equal')
+        ax[2].set_proj_type('ortho')
+        ax[2].legend()
+
+        # x/y/z projections
         k1 = [0,0,1]; k2 = [1,2,2]
         k3 = ['Bx [G]','Bx [G]','By [G]']
-        k4 = ['By [G]','Bz [G]','Bz [G]']
-               
+        k4 = ['By [G]','Bz [G]','Bz [G]']               
         for k in range(3):
-            a = ax[2+k]
+            a = ax[3+k]
             a.plot(self.dataRaw[k1[k],:]/self.s,self.dataRaw[k2[k],:]/self.s,'r',label='raw')
             a.plot(self.dataCal[k1[k],:]/self.s,self.dataCal[k2[k],:]/self.s,'g',label='cal')
             t = np.deg2rad( np.asarray(range(3601))/10)
-            a.plot(0.5*np.sin(t),0.5*np.cos(t),'k')
+            a.plot(self.targetField*np.sin(t),self.targetField*np.cos(t),'k')
             a.set_xlim(-Bl,Bl)
             a.set_ylim(-Bl,Bl)             
             a.set_aspect('equal')
             a.set_xlabel(k3[k])
             a.set_ylabel(k4[k])
             a.grid('on')
-            if k==1: a.legend()
+            
 
-    
-    def plotTimeSignal(self,inLSB = False, a1=None):
-        if inLSB: s =1 
-        else:     s = self.s
-        
-        #fig,axs = plt.subplots(2,2)
-        if a1 is None: 
-            fig,axs = plt.subplots(1,1)
-            a1 = axs; #a1 = axs[0][0]; a2 = axs[1][0]
-            #a3 = axs[0][1]; a4 = axs[1][1]
-        #else:
-        #    fig = a1.get_figure()
-        
-        a1.plot(self.dataRaw[0]/s,'-r');
-        a1.plot(self.dataRaw[1]/s,'-g');
-        a1.plot(self.dataRaw[2]/s,'-b');
-        a1.plot(self.dataCal[0]/s,':r');
-        a1.plot(self.dataCal[1]/s,':g');
-        a1.plot(self.dataCal[2]/s,':b');
-        a1.plot(self.fieldVec/s,'-k');
-        a1.plot(self.fieldVecCal/s,':k');
-        a1.legend(['Bx_raw','By','Bz','Bx_cal','abs(B)'],loc="center right")
-        a1.set_title('raw')
-        a1.grid('on')
-        a1.set_xlabel('samples')
-        if inLSB:
-            a1.set_ylabel('signal [LSB]')
-            a1.set_ylim(-5,5)
-        else: 
-            a1.set_ylabel('signal [GAUSS]')
-            Bl = MagneticSensor.Blim
-            a1.set_ylim(-Bl,Bl)
-            #a1.set_ylim(-20000/s,20000/s)
+        # time signals raw
+        s = self.s
+        ax[0].plot(self.dataRaw[0]/s,'-r');
+        ax[0].plot(self.dataRaw[1]/s,'-g');
+        ax[0].plot(self.dataRaw[2]/s,'-b');
+        ax[0].plot(self.fieldVec/s,'-k');
+        ax[0].set_title('raw')
 
-        
+        # time signals after calibration
+        ax[1].plot(self.dataCal[0]/s,'-r');
+        ax[1].plot(self.dataCal[1]/s,'-g');
+        ax[1].plot(self.dataCal[2]/s,'-b');
+        ax[1].plot(self.fieldVecCal/s,'-k');
+        ax[1].set_title(f'calibrated ({self.method})')
+
+        for i in range(2):
+            ax[i].legend(['Bx','By','Bz','abs(B)'],loc="center right")
+            ax[i].set_xlabel('samples')
+            ax[i].set_ylabel('signal [GAUSS]')        
+            ax[i].grid('on')
+            ax[i].set_ylim(-Bl,Bl)
+
         return
 
 
