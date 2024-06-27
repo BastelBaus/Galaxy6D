@@ -4,6 +4,8 @@ Mechanics/*
 SystemSimulation/*
 Electronics/*
 
+_build
+
 ConfigSoftware/*
 ConfigSoftware/.RefPositionData.txt
 
