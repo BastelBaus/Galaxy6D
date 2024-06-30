@@ -2,8 +2,10 @@
 
 # old stuff
 archive
-sources
-photos
+
+# quellen
+_sources
+_photos
 .vscode
 
 # Prerequisites

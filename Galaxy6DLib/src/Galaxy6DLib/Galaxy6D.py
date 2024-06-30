@@ -12,13 +12,21 @@ Link: Magnetic Sensor Calibrataion Algorithms: https://www.ncbi.nlm.nih.gov/pmc/
 
 import logging 
 logger = logging.getLogger(__name__)
-#logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 import pickle
 import csv
 import scipy
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.spatial.transform import Rotation as R
+
+
+def sqrtSumSqr(x):
+    return np.sqrt(np.sum(np.square(x),axis=1))
+def sqrtMeanSqr(x):
+    return np.sqrt(np.mean(np.square(x),axis=1))
+
 
 def meanLength(vec):
     ''' manLeangth returns the length of an 3x1 arrary or an list of nx3 arrays
@@ -50,6 +58,10 @@ def plt_maximize():
     
 
 class MagneticSensor:
+    ''' This class implements a single axis magnetic sensor
+    '''
+
+
     col  = ['.r','.b','.g']  # just a color vector
     
     Blim = 1.5 # [Gauss] he limits when plotting the magnetic fields
@@ -57,9 +69,17 @@ class MagneticSensor:
     
     
     
-    def __init__(self, data=None,sensitivity=1):
+    def __init__(self, data=None,sensitivity=1.0):
+        ''' Init Function Docu
+            :param data:  desdcription of data
+            :type data: list, optional
+
+        '''
+        #TODO: setting the senbsitivity does not work
         self.n = 0                    # number of samples
-        self.s = 1                    # sensitivity in [LSB/G]
+        self.s = 1.0                  # sensitivity in [LSB/G]
+        self.method = None
+        self.doplot = False
 
         self.tm              = None   # timestamps
         self.dataRaw         = None   # the raw measurement data    
@@ -77,7 +97,7 @@ class MagneticSensor:
 
         if  data is not None: self.__setMeasurements(data,sensitivity)
 
-    def __setMeasurements(self,data,sensitivity=1):       
+    def __setMeasurements(self,data,sensitivity=1.0):       
 
         logger.debug(f'set measurement with shape {data.shape} (sensitivity:{sensitivity})')
         self.dataRaw = data
@@ -85,7 +105,14 @@ class MagneticSensor:
         self.s       = sensitivity
 
     def setTime(self,timestamps):
-        self.tm = timestamps
+        """ setTime sets the time axis for the measurement
+        
+        :param timestamps:  an iterable list of timestamps
+        :type timestamps: list
+        :return: Nothing
+        :rtype: None
+        """        
+        self.tm = np.asarray(timestamps)
 
     def calculateRawKPIs(self):
         self.fieldVec  = np.sqrt( np.square(self.dataRaw[0]) + np.square(self.dataRaw[1]) + np.square(self.dataRaw[2]) )
@@ -102,12 +129,27 @@ class MagneticSensor:
                                         np.arctan2(self.dataCal[0], self.dataCal[2])*180/np.pi,
                                         np.arctan2(self.dataCal[1], self.dataCal[2])*180/np.pi ] )
 
-    def setAib(self,Ai,b):
-        self.Ai = AI
+    def setAib(self,Ai,b, targetField=1.0, printStats=False):
+        """ setAib sets the multiplication matrix Ai and ofset vector b.
+          
+        
+        :param targetField:  The target magnitude of the magnetic field vector, defaults to 1.0  
+        :type targetField: float
+        :param printStats:  If true, some statistics are printed to the standard io, defaults to False
+        :type printStats: Boolean
+        :return: Nothing
+        
+        """        
+
+        self.method = "extern"
+        self.Ai = Ai
         self.b  = b        
+        self.targetField = targetField
         self.__applyCalibration()
+        self.calculateRawKPIs()
         self.calculateCalKPIs()                                                                                                       
-        if printStats: self.printStats()
+        if printStats: self.printStats() #TODO: does not yetr work
+
 
     def calculateAll(self, targetField=1, method='minimize', printStats = True):
         ''' Estimates the calibration parameters, applies them and print statistics.
@@ -151,6 +193,8 @@ class MagneticSensor:
         err = np.sqrt(np.mean(np.square(ampCal-self.targetField )))
         return err
 
+    def getMean(self):
+            return np.mean(self.dataRaw,axis=1)
 
         
     def printStats(self):
@@ -187,30 +231,35 @@ class MagneticSensor:
                         Default ('minimize')
         '''
         self.method = method
-        if method=='minimize': self.estimateCalibrationMinimize(targetField=targetField)
-        else: self.estimateCalibrationLiterature(targetField=targetField)
+        if method=='minimize':    self.estimateCalibrationMinimizeAbs(targetField=targetField)
+        if method=='minimizeVec': self.estimateCalibrationMinimizeVec(targetField=targetField)
+        if method=='literature':  self.estimateCalibrationLiterature(targetField=targetField)
+        
 
-    def estimateCalibrationMinimize(self,targetField=1):
+    def estimateCalibrationMinimizeVec(self,targetField=1):
 
         self.Ai = np.eye(3)
         self.b = np.zeros(3)
         self.targetField = targetField
 
+        mm = np.mean(self.dataRaw,axis=1)
+        mr = (np.max(self.dataRaw,axis=1)-np.min(self.dataRaw,axis=1))/2
+
         def optfun(x,val):
             
             #logger.debug(f'get:{x.shape} val:{x} ' )
-            mm = np.mean(val,axis=1)
+            #mm = np.mean(val,axis=1)
             Ai = x[0:9].reshape(3,3)
             b  = x[9:12]
             dataCal = (val.T - (b + mm) ) @ Ai
-            ampCal = np.sqrt(np.sum(np.square(dataCal),axis=1))
-            err = np.sqrt(np.mean(np.square(ampCal-self.targetField )))
+
+            dataRef = ( dataCal / np.linalg.norm(dataCal,axis=1,keepdims=True) ) * self.targetField             
+            ampDelta =  np.sqrt(np.sum(np.square( dataCal-dataRef ),axis=1))
+            err = np.sqrt(np.mean(np.square(ampDelta )))
             return err
 
         x0 = np.concatenate( ( np.eye(3).reshape( (9,) ), np.zeros((3,))) )
         logger.info(f'Optimize with start value size:{x0.shape} val:{x0} to target {self.targetField}' )
-        mm = np.mean(self.dataRaw,axis=1)
-        mr = (np.max(self.dataRaw,axis=1)-np.min(self.dataRaw,axis=1))/2
         relTol = 0.4; 
         tol = [ ( mm[i] - relTol*mr[i]  , mm[i] + relTol*mr[i] ) for i in range(3) ]  
         bnds = ( (None,None), (None,None), (None,None), \
@@ -228,7 +277,47 @@ class MagneticSensor:
             logger.warning(f'Optimize failed: {res.message} \n >>> {res.x.shape} val:{res.x}' )
 
         logger.info(f'New Calib Params:\nAi:\n{self.Ai.round(5)}\nb:{self.b.round(5)} ' )
-        
+
+    def estimateCalibrationMinimizeAbs(self,targetField=1):
+
+        self.Ai = np.eye(3)
+        self.b = np.zeros(3)
+        self.targetField = targetField
+
+        mm = np.mean(self.dataRaw,axis=1)
+        mr = (np.max(self.dataRaw,axis=1)-np.min(self.dataRaw,axis=1))/2
+
+        def optfun(x,val):
+            
+            #logger.debug(f'get:{x.shape} val:{x} ' )
+            #mm = np.mean(val,axis=1)
+            Ai = x[0:9].reshape(3,3)
+            b  = x[9:12]
+            dataCal = (val.T - (b + mm) ) @ Ai
+            ampCal = np.sqrt(np.sum(np.square(dataCal),axis=1))
+            err = np.sqrt(np.mean(np.square(ampCal-self.targetField )))
+            return err
+
+        x0 = np.concatenate( ( np.eye(3).reshape( (9,) ), np.zeros((3,))) )
+        logger.info(f'Optimize with start value size:{x0.shape} val:{x0} to target {self.targetField}' )
+        relTol = 0.4; 
+        tol = [ ( mm[i] - relTol*mr[i]  , mm[i] + relTol*mr[i] ) for i in range(3) ]  
+        bnds = ( (None,None), (None,None), (None,None), \
+                 (None,None), (None,None), (None,None), \
+                 (None,None), (None,None), (None,None), \
+                  tol[0], tol[1], tol[2] )
+        #res = scipy.optimize.minimize(optfun,x0, self.dataRaw, bounds =bnds) #TODO: does not work, don'T know why
+        res = scipy.optimize.minimize(optfun,x0, self.dataRaw)
+
+        if res.success:
+            logger.info(f'Optimize successfully: {res.fun} @ {res.x.shape}' )
+            self.Ai = res.x[0:9].reshape(3,3)
+            self.b  = res.x[9:12] + mm
+        else:
+            logger.warning(f'Optimize failed: {res.message} \n >>> {res.x.shape} val:{res.x}' )
+
+        logger.info(f'New Calib Params:\nAi:\n{self.Ai.round(5)}\nb:{self.b.round(5)} ' )
+
 
 
     def estimateCalibrationLiterature(self,targetField=1):
@@ -398,8 +487,14 @@ class MagneticSensor:
         k4 = ['By [G]','Bz [G]','Bz [G]']               
         for k in range(3):
             a = ax[3+k]
+            mra = np.mean( self.dataRaw[k1[k],:]/self.s )
+            mrb = np.mean( self.dataRaw[k2[k],:]/self.s ) 
+            mca = np.mean( self.dataCal[k1[k],:]/self.s )
+            mcb = np.mean( self.dataCal[k2[k],:]/self.s ) 
             a.plot(self.dataRaw[k1[k],:]/self.s,self.dataRaw[k2[k],:]/self.s,'r',label='raw')
             a.plot(self.dataCal[k1[k],:]/self.s,self.dataCal[k2[k],:]/self.s,'g',label='cal')
+            a.plot(mra,mrb,'ok',label='center_r_a_w')
+            a.plot(mca,mcb,'ok',label='center_c_a_l')
             t = np.deg2rad( np.asarray(range(3601))/10)
             a.plot(self.targetField*np.sin(t),self.targetField*np.cos(t),'k')
             a.set_xlim(-Bl,Bl)
@@ -412,6 +507,7 @@ class MagneticSensor:
 
         # time signals raw
         s = self.s
+        print("S::::",s)
         ax[0].plot(self.dataRaw[0]/s,'-r');
         ax[0].plot(self.dataRaw[1]/s,'-g');
         ax[0].plot(self.dataRaw[2]/s,'-b');
@@ -448,49 +544,168 @@ class Galaxy6D:
         self.ms = [None,None,None]  # Magnetic Sensors Class
         self.rate = None
         self.acc  = None
+        self.doplot = False
 
+    def __optfun(self,x,val):
+        ''' 
+            Parameters:
+                x the current value array
+                val: parameters,
+        '''
+        mm = [None,None,None]
+        for i in range(3): mm[i] = self.ms[i].getMean()
+
+
+        dataCal = [None,None,None]
+        for i in range(3):
+            Ai = x[( 0+i*12):( 9+i*12)].reshape(3,3)
+            b  = x[( 9+i*12):(12+i*12)]
+            r = R.from_euler('z', i*120, degrees=True)
+            dataCal[i] = ( val[i].T - (b + mm[i]) ) @ Ai 
+            dataCal[i] = r.apply( dataCal[i] )
+            
+        # dataCal is the array of corrected magentic vectors for all 
+        # three sensors. The amplitude should be self.targetField for 
+        # all three sensors and the direction should be equal after 
+        # 120deg rotations. This leads to a multi target optimization
+        # - getting the average direction of all three vectors
+        # - scaling to the targetField
+        # - calculating the geometrical difference to this vector
+        #   for all three vectors
+        # - calculating the mean squared error of all this differences
+        #
+        # Reasoning: the earth magnetic field amplitude does not change and the 
+        # best estimate of the direction is the average of all three sensors.
+        # Since we estimate the full amtrix Ai, it includes the rotations already
+        #
+    
+        sumCal = dataCal[0] #+ dataCal[1]  + dataCal[2]
+        normSumCal = np.linalg.norm(sumCal,axis=1,keepdims=True)
+        #print("sum shape:",sumCal.shape)
+        targetVec = (sumCal / normSumCal ) * self.targetField *2
+
+        normTargetVec = np.linalg.norm(targetVec,axis=1)
+        #print("minmax1: ",np.min(normTargetVec),np.max(normTargetVec))
+        #print("minmax2: ",np.min(normSumCal),np.max(normSumCal))
+        #print("Norm:", np.linalg.norm(targetVec , axis = 1))
+        #print("sum shape:",targetVec.shape)
+        #print("sum :",dataCal[i].shape)
+
+        err = [0,0,0]
+        for i in range(3):
+            #ampCal = np.sqrt(np.sum(np.square(dataCal[i]),axis=1))
+            #err[i] = np.sqrt(np.mean(np.square(ampCal-self.targetField )))
+            errVec = (targetVec - dataCal[i])
+            ampCal = np.sqrt(np.sum(np.square(errVec),axis=1))
+            ofs =  np.where(ampCal<self.targetField/2,1,0)*self.targetField*5
+            #print(" - ",np.min(ampCal),np.max(ampCal))
+            #print(" - ",np.min(ofs),np.max(ofs))
+            #ampCal = ampCal + ofs
+            #print(" - ",np.min(ampCal),np.max(ampCal))
+            err[i] = np.sqrt(np.mean(np.square(ampCal)))
+            if self.doplot:
+                plt.figure()
+                plt.plot(dataCal[i],'-')
+                plt.plot(targetVec,':')
+                plt.show(block=False)
+                plt.figure()
+                plt.plot(normSumCal,'-')
+                plt.show(block=False)
+                plt.figure()
+                plt.plot(errVec,'-')
+                plt.show(block=False)
+                plt.figure()
+                plt.plot(ampCal,'-')
+                plt.show()
+                raise SystemExit
+        
+        #return err[0]
+        return np.sqrt(np.mean(np.square(err)))
+
+
+
+    def calRemainder(self):
+
+        mm = [None,None,None]
+        for i in range(3): mm[i] = np.mean(self.ms[i].dataRaw,axis=1)
+        val = [self.ms[0].dataRaw,self.ms[1].dataRaw,self.ms[2].dataRaw]
+        x = np.zeros(12*3)
+        for i in range(3):
+            x[( 0+i*12):( 9+i*12)] = self.ms[i].Ai.reshape(9,)
+            x[( 9+i*12):(12+i*12)] = self.ms[i].b - mm[i]
+        return self.__optfun(x,val)
+        
     def estimateCalibration(self,targetField=1):
 
         self.Ai = np.eye(3)
         self.b = np.zeros(3)
         self.targetField = targetField
 
-        def optfun(x,val):
+        mm = [None,None,None]
+        for i in range(3): 
+            mm[i] = self.ms[i].getMean()
+            print(f"mm[{i}]:{mm[i]}")
             
-            #logger.debug(f'get:{x.shape} val:{x} ' )
-            mm = np.mean(val,axis=1)
-            Ai = x[0:9].reshape(3,3)
-            b  = x[9:12]
-            dataCal = (val.T - (b + mm) ) @ Ai
-            ampCal = np.sqrt(np.sum(np.square(dataCal),axis=1))
-            err = np.sqrt(np.mean(np.square(ampCal-self.targetField )))
-            return err
+        val = [self.ms[0].dataRaw,self.ms[1].dataRaw,self.ms[2].dataRaw]
+            
 
-        x0 = np.concatenate( ( np.eye(3).reshape( (9,) ), np.zeros((3,))) )
-        logger.info(f'Optimize with start value size:{x0.shape} val:{x0} to target {self.targetField}' )
-        mm = np.mean(self.ms[0].dataRaw,axis=1)
-        mr = (np.max(self.ms[0].dataRaw,axis=1)-np.min(self.ms[0].dataRaw,axis=1))/2
-        relTol = 0.4; 
-        tol = [ ( mm[i] - relTol*mr[i]  , mm[i] + relTol*mr[i] ) for i in range(3) ]  
+        relTol = 0.2; 
+        mr = [0,0,0]; tol = [0,0,0]
+        for i in range(3):
+            mr[i] = (np.max(self.ms[i].dataRaw,axis=1)-np.min(self.ms[i].dataRaw,axis=1))/2
+            print(f"param {i}")
+            tol[i] = [ ( mm[i][j] - relTol*mr[i][j]  , mm[i][j] + relTol*mr[i][j] ) for j in range(3) ]  
+            print("mr ",mr[i])
+            print("mm ",mm[i])
+            print("tol",tol[i])
+        
         bnds = ( (None,None), (None,None), (None,None), \
                  (None,None), (None,None), (None,None), \
                  (None,None), (None,None), (None,None), \
-                  tol[0], tol[1], tol[2] )
-        res = scipy.optimize.minimize(optfun,x0, self.ms[0].dataRaw)
+                  tol[0][0], tol[0][1], tol[0][2], \
+                (None,None), (None,None), (None,None), \
+                 (None,None), (None,None), (None,None), \
+                 (None,None), (None,None), (None,None), \
+                  tol[1][0], tol[1][1], tol[1][2], \
+                (None,None), (None,None), (None,None), \
+                 (None,None), (None,None), (None,None), \
+                 (None,None), (None,None), (None,None), \
+                  tol[2][0], tol[2][1], tol[2][2] \
+                ) 
+
+
+        x0 = np.concatenate( ( np.eye(3).reshape( (9,) ), np.zeros((3,))) )
+        x0 = np.concatenate( ( x0,x0,x0) )        
+        
+        x0 = [None,None,None]
+        for i in range(3):
+            print(np.mean(tol[i],axis=0))
+            x0[i] = np.concatenate( ( np.eye(3).reshape( (9,) ), np.mean(tol[i],axis=1) ) ) 
+        x0 = np.concatenate( ( x0[0],x0[1],x0[2]) )        
+
+
+        logger.info(f'Optimize with start value size:{x0.shape} val:{x0} to target {self.targetField}' )
+        logger.info(f'Bounds:\n{bnds}' )
+
+        res = scipy.optimize.minimize(self.__optfun,x0, args=val, bounds=bnds,tol=1e-5,method='Powell')
+        #res = scipy.optimize.minimize(optfun,x0, args=val,tol=1e-3)
 
         if res.success:
             logger.info(f'Optimize successfully: {res.fun} @ {res.x.shape}' )
-            Ai = res.x[0:9].reshape(3,3)
-            b  = res.x[9:12] + mm
-            self.ms[0].setAib(Ai,b)
         else:
             logger.warning(f'Optimize failed: {res.message} \n >>> {res.x.shape} val:{res.x}' )
 
+        logger.info(f'New Calib Params:' )
+        for i in range(3):
+            Ai = res.x[( 0+i*12):( 9+i*12)].reshape(3,3)
+            b0  = res.x[( 9+i*12):(12+i*12)]
+            b = b0 + 0*mm[i]
+            print('b0:',b0)
+            self.ms[i].setAib(Ai,b,self.targetField)
+            logger.info(f' {i}: {b} \n Ai: {Ai}' )
+
         #TODO: Change to function, set Ai,b
 
-        
-        logger.info(f'New Calib Params:\nAi:\n{self.Ai.round(5)}\nb:{self.b.round(5)} ' )
-        
 
         
     def loadFile(self,filename):
@@ -509,11 +724,11 @@ class Galaxy6D:
                 
         result = np.np.asarray(result, dtype=np.float32)
         result = np.transpose(result)
-        self.ms[0] = MagneticSensor(( result[ 0: 3]), self.MAG_SENS_LOW)
-        self.ms[1] = MagneticSensor(( result[ 3: 6]), self.MAG_SENS_LOW)
-        self.ms[2] = MagneticSensor(( result[ 6: 9]), self.MAG_SENS_LOW)
-        self.acc   = MagneticSensor(( result[ 9:12]) )
-        self.rate  = MagneticSensor(( result[12:15]))
+        self.ms[0] = MagneticSensor(result[:, 0: 3] / self.MAG_SENS_LOW)
+        self.ms[1] = MagneticSensor(( result[:, 3: 6])/ self.MAG_SENS_LOW)
+        self.ms[2] = MagneticSensor(( result[:, 6: 9])/ self.MAG_SENS_LOW)
+        self.acc   = MagneticSensor(( result[:, 9:12]) )
+        self.rate  = MagneticSensor(( result[:,12:15]))
                 
         timestamp = np.np.asarray(timestamp, dtype=np.float32)
         result = np.transpose(result)
@@ -533,9 +748,9 @@ class Galaxy6D:
             
         self.rate  = MagneticSensor(( data[:, 1: 4].T))
         self.acc   = MagneticSensor(( data[:, 4: 7].T) )
-        self.ms[0] = MagneticSensor(( data[:, 7:10].T), self.MAG_SENS_LOW)
-        self.ms[1] = MagneticSensor(( data[:,10:13].T), self.MAG_SENS_LOW)
-        self.ms[2] = MagneticSensor(( data[:,13:16].T), self.MAG_SENS_LOW)
+        self.ms[0] = MagneticSensor(( data[:, 7:10].T)/ self.MAG_SENS_LOW)
+        self.ms[1] = MagneticSensor(( data[:,10:13].T)/ self.MAG_SENS_LOW)
+        self.ms[2] = MagneticSensor(( data[:,13:16].T)/ self.MAG_SENS_LOW)
                 
         timestamp = np.asarray(data[:, 0],dtype=np.float32) 
         timestamp = timestamp- timestamp[0]

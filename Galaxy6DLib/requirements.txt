@@ -2,3 +2,4 @@ numpy
 matplotlib
 scipy
 sphinx
+pydata-sphinx-theme
