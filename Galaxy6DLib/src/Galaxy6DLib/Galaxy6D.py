@@ -131,7 +131,6 @@ class MagneticSensor:
 
     def setAib(self,Ai,b, targetField=1.0, printStats=False):
         """ setAib sets the multiplication matrix Ai and ofset vector b.
-          
         
         :param targetField:  The target magnitude of the magnetic field vector, defaults to 1.0  
         :type targetField: float
