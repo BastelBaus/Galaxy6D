@@ -16,7 +16,7 @@ Full 6D DIY projects
 
     2016 , Spacefox                 , "Pepijn de Vos             
     ","`link <https://github.com/pepijndevos/spacefox>`__  `video <https://www.youtube.com/watch?v=rLTWWPftyac>`__ 
-    ", |Spacefox1| |Spacefox2|, "finished w/ video , Stewart platform made from potentiometers
+    ", |Spacefox1| |Spacefox2|, "finished w/ video" , Stewart platform made from potentiometers
     ", 3D prints & cuts from triplex 
     2022 , OS3M Mouse	            , "Colton Baldridge          
     ", "`link <https://hackaday.io/project/187172-os3m-mouse>`__ 
