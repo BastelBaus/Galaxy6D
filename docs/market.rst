@@ -53,6 +53,15 @@ Full 6D DIY projects
     ", |OM3DM|, "first tests
     ", "magnets and hall effect sensors
     ", 3D printed spring
+   2024, Hall Effect CAD Mouse / Spacemouse, "John Crombie
+   ", "`video <https://www.youtube.com/watch?v=ybhJu3VXs2Q>`__ 
+   `repo <https://github.com/ChromeBee/Hall-Effect-Sensor-CAD-Mouse-Spacemouse>`__ 
+    ", |HallEffectCADMouse|, "working
+    ", "magnets and hall effect sensors
+    ", 3D printed spring
+   
+
+
 
 
 
@@ -89,6 +98,10 @@ Full 6D DIY projects
    :height: 40pt
    :align: top
 .. |OM3DM| image:: images/OM3DM.png
+   :width: 40pt
+   :height: 40pt
+   :align: top   
+.. |HallEffectCADMouse| image:: images/HallEffectCADMouse.png
    :width: 40pt
    :height: 40pt
    :align: top   
