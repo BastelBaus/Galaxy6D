@@ -41,6 +41,11 @@ Full 6D DIY projects
     ", |Mushroom|, "finished w/ video 
     ", "Stewart platform made from potentiometers (3x 2D analog joysticks)
     ", 3D printed 
+
+..  csv-table:: 
+    :header: started, name, author, link, picture, status, "detection and electronics", mechanics
+    :widths: 5, 10,10,10,25,15,20,20
+    :align: left        
     2013 , 6D (axsotic)             , "valentin heun             
     ", "`link <http://valentinheun.com/portfolio/6d/>`__
     ", |axsotic|,  start of a startup which is no longer existing  , "? 
@@ -60,6 +65,12 @@ Full 6D DIY projects
     ", |OM3DM|, "first tests
     ", "magnets and hall effect sensors
     ", 3D printed spring
+
+..  csv-table:: 
+    :header: started, name, author, link, picture, status, "detection and electronics", mechanics
+    :widths: 5, 10,10,10,25,15,20,20
+    :align: left    
+        
    2024, Hall Effect CAD Mouse / Spacemouse, "John Crombie
    ", "`video <https://www.youtube.com/watch?v=ybhJu3VXs2Q>`__ 
    `repo <https://github.com/ChromeBee/Hall-Effect-Sensor-CAD-Mouse-Spacemouse>`__ 
