@@ -10,8 +10,7 @@ Full 6D DIY projects
 ----------------------------------------------
 
 ..  csv-table:: 
-    :header: started, name, author, link, picture, status, "detection and 
-             electronics", mechanics
+    :header: started, name, author, link, picture, status, "detection and electronics", mechanics
     :widths: 5, 10,10,10,10,10,25,25
     :align: left
 
