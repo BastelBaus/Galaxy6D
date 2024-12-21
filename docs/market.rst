@@ -9,8 +9,6 @@ Last update Sep/2023. Refer also to `hackaday.io <https://hackaday.io/pages/1354
 Full 6D DIY projects
 ----------------------------------------------
 
-
-
 ..  csv-table:: 
     :header: started, name, author, link, picture, status, "detection and electronics", mechanics
     :widths: 5, 10,10,10,25,15,20,20
@@ -20,13 +18,7 @@ Full 6D DIY projects
     ","`link <https://github.com/pepijndevos/spacefox>`__  `video <https://www.youtube.com/watch?v=rLTWWPftyac>`__ 
     ", |Spacefox1| |Spacefox2|, finished w/ video , "Stewart platform made from potentiometers
     ", 3D prints & cuts from triplex 
-
-..  csv-table:: 
-    :header: started, name, author, link, picture, status, "detection and electronics", mechanics
-    :widths: 5, 10,10,10,25,15,20,20
-    :align: left    
-
-    2022 , OS3M Mouse	            , "Colton Baldridge          
+   2022 , OS3M Mouse	            , "Colton Baldridge          
     ", "`link <https://hackaday.io/project/187172-os3m-mouse>`__ 
     ", |OS3MMouse| , "in development 
     ", "inductance to digital sensors for distance to w/ metal object as Stewart platform
@@ -40,12 +32,7 @@ Full 6D DIY projects
     ","`link <https://www.instructables.com/Space-Mushroom-Full-6-DOFs-Controller-for-CAD-Appl/>`__ `video <https://www.youtube.com/watch?v=Vs6Xte4gOxk>`__
     ", |Mushroom|, "finished w/ video 
     ", "Stewart platform made from potentiometers (3x 2D analog joysticks)
-    ", 3D printed 
-
-..  csv-table:: 
-    :header: started, name, author, link, picture, status, "detection and electronics", mechanics
-    :widths: 5, 10,10,10,25,15,20,20
-    :align: left        
+    ", 3D printed      
     2013 , 6D (axsotic)             , "valentin heun             
     ", "`link <http://valentinheun.com/portfolio/6d/>`__
     ", |axsotic|,  start of a startup which is no longer existing  , "? 
@@ -70,17 +57,13 @@ Full 6D DIY projects
     :header: started, name, author, link, picture, status, "detection and electronics", mechanics
     :widths: 5, 10,10,10,25,15,20,20
     :align: left    
-        
-   2024, Hall Effect CAD Mouse / Spacemouse, "John Crombie
-   ", "`video <https://www.youtube.com/watch?v=ybhJu3VXs2Q>`__ 
-   `repo <https://github.com/ChromeBee/Hall-Effect-Sensor-CAD-Mouse-Spacemouse>`__ 
+
+   2024, "Hall Effect CAD Mouse", "John Crombie
+   ", "`video <https://www.youtube.com/watch?v=ybhJu3VXs2Q>`__ & `repo <https://github.com/ChromeBee/Hall-Effect-Sensor-CAD-Mouse-Spacemouse>`__ 
     ", |HallEffectCADMouse|, "working
     ", "magnets and hall effect sensors
-    ", 3D printed spring
+    ", 3D printed pull springs
    
-
-
-
 
 
 .. |Spacefox1| image:: images/spacefox_v1.png
