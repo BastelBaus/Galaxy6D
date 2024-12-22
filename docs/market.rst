@@ -36,13 +36,13 @@ Full 6D DIY projects
     2013 , 6D (axsotic)             , "valentin heun             
     ", "`link <http://valentinheun.com/portfolio/6d/>`__
     ", |axsotic|,  start of a startup which is no longer existing  , "? 
-    ", 3D printed ?
+    ", 3D printed ?..  csv-table:: 
 
 ..  csv-table:: 
     :header: started, name, author, link, picture, status, "detection and electronics", mechanics
     :widths: 5, 10,10,10,25,15,20,20
     :align: left    
-    
+
     2021 , 6D input                 , "RepRap Ltd.               
     ", "`link <https://github.com/RepRapLtd/6DInput/tree/main/RepRapLtd#update-3>`__ 
     ", |6DInput| , "investigation phase 
@@ -51,7 +51,7 @@ Full 6D DIY projects
     2022 , Haptik 6DOF input device , "Matthew Schubert          
     ", "`link <https://blog.ioces.com/matt/posts/haptick-part-two>`__ & `video <https://youtu.be/miJmKHkGehw>`__ 
     ", |6DOFHaptik| , "prototype build 
-    "," Based on force sensors (strain gauges) and Steward platform principle
+    ","Based on force sensors (strain gauges) and Steward platform principle
     ",  n/a 
     2024 , One more 3D mouse        , "Vedran                    
     ", "`link <https://hackaday.io/project/196687>`__ 
