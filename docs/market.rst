@@ -22,7 +22,12 @@ Full 6D DIY projects
     ", "`link <https://hackaday.io/project/187172-os3m-mouse>`__ 
     ", |OS3MMouse| , "in development 
     ", "inductance to digital sensors for distance to w/ metal object as Stewart platform
-    ", 3D print (included printed spring mechanism) 
+    ", 3D print (included printed spring mechanism)
+
+..  csv-table:: 
+    :header: started, name, author, link, picture, status, "detection and electronics", mechanics
+    :widths: 5, 10,10,10,25,15,20,20
+    :align: left        
     2022 , Shamrock Sixnav	        , "Brian Lu (GreenCap)
     ", "`link <https://www.electromaker.io/project/view/shamrock-sixnav-low-cost-compatible-6dof-space-mouse>`__ 
     ", |Shamrock| ,"HW pictures, raw data but no final results 
