@@ -12,8 +12,7 @@ Full 6D DIY projects
 ..  csv-table:: 
     :header: started, name, author, link, picture, status, "detection and electronics", mechanics
     :widths: 5, 10,10,10,25,15,20,20
-    :align: left    
-    
+    :align: left        
     2016 , Spacefox                 , "Pepijn de Vos             
     ","`link <https://github.com/pepijndevos/spacefox>`__  `video <https://www.youtube.com/watch?v=rLTWWPftyac>`__ 
     ", |Spacefox1| |Spacefox2|, finished w/ video , "Stewart platform made from potentiometers
@@ -47,7 +46,6 @@ Full 6D DIY projects
     :header: started, name, author, link, picture, status, "detection and electronics", mechanics
     :widths: 5, 10,10,10,25,15,20,20
     :align: left    
-
     2021 , 6D input                 , "RepRap Ltd.               
     ", "`link <https://github.com/RepRapLtd/6DInput/tree/main/RepRapLtd#update-3>`__ 
     ", |6DInput| , "investigation phase 
@@ -68,7 +66,6 @@ Full 6D DIY projects
     :header: started, name, author, link, picture, status, "detection and electronics", mechanics
     :widths: 5, 10,10,10,25,15,20,20
     :align: left    
-
    2024, "Hall Effect CAD Mouse", "John Crombie
    ", "`video <https://www.youtube.com/watch?v=ybhJu3VXs2Q>`__ & `repo <https://github.com/ChromeBee/Hall-Effect-Sensor-CAD-Mouse-Spacemouse>`__ 
     ", |HallEffectCADMouse|, "working
