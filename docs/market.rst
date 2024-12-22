@@ -18,11 +18,24 @@ Full 6D DIY projects
     ","`link <https://github.com/pepijndevos/spacefox>`__  `video <https://www.youtube.com/watch?v=rLTWWPftyac>`__ 
     ", |Spacefox1| |Spacefox2|, finished w/ video , "Stewart platform made from potentiometers
     ", 3D prints & cuts from triplex 
+
+..  csv-table:: 
+    :header: started, name, author, link, picture, status, "detection and electronics", mechanics
+    :widths: 5, 10,10,10,25,15,20,20
+    :align: left   
+
    2022 , OS3M Mouse	            , "Colton Baldridge          
     ", "`link <https://hackaday.io/project/187172-os3m-mouse>`__ 
     ", |OS3MMouse| , "in development 
     ", "inductance to digital sensors for distance to w/ metal object as Stewart platform
     ", 3D print (included printed spring mechanism)
+
+
+..  csv-table:: 
+    :header: started, name, author, link, picture, status, "detection and electronics", mechanics
+    :widths: 5, 10,10,10,25,15,20,20
+    :align: left   
+
     2022 , Shamrock Sixnav	        , "Brian Lu (GreenCap)
     ", "`link <https://www.electromaker.io/project/view/shamrock-sixnav-low-cost-compatible-6dof-space-mouse>`__ 
     ", |Shamrock| ,"HW pictures, raw data but no final results 
@@ -63,7 +76,7 @@ Full 6D DIY projects
     :header: started, name, author, link, picture, status, "detection and electronics", mechanics
     :widths: 5, 10,10,10,25,15,20,20
     :align: left    
-    
+
    2024, "Hall Effect CAD Mouse", "John Crombie
    ", "`video <https://www.youtube.com/watch?v=ybhJu3VXs2Q>`__ & `repo <https://github.com/ChromeBee/Hall-Effect-Sensor-CAD-Mouse-Spacemouse>`__ 
     ", |HallEffectCADMouse|, "working
