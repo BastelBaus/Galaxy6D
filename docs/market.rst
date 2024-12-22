@@ -16,7 +16,7 @@ Full 6D DIY projects
 
     2016 , Spacefox                 , "Pepijn de Vos             
     ","`link <https://github.com/pepijndevos/spacefox>`__  `video <https://www.youtube.com/watch?v=rLTWWPftyac>`__ 
-    ", |Spacefox1| |Spacefox2|, finished w/ video , "Stewart platform made from potentiometers
+    ","|Spacefox1| |Spacefox2|", "finished w/ video" , "Stewart platform made from potentiometers
     ", 3D prints & cuts from triplex 
 
 This is some text
@@ -29,7 +29,7 @@ This is some text
    2022 , OS3M Mouse	            , "Colton Baldridge          
     ", "`link <https://hackaday.io/project/187172-os3m-mouse>`__ 
     ", |OS3MMouse| , "in development 
-    ", "inductance to digital sensors for distance to w/ metal object as Stewart platform
+    ", "digital inductance sensors w/ metal as Stewart platform
     ", "3D print (included printed spring mechanism)"
 
 This is some text
@@ -53,12 +53,6 @@ This is some text
     ", "`link <http://valentinheun.com/portfolio/6d/>`__
     ", |axsotic|,  start of a startup which is no longer existing  , "? 
     ", 3D printed ?
-
-..  csv-table:: 
-    :header: started, name, author, link, picture, status, "detection and electronics", mechanics
-    :widths: 5, 10,10,10,25,15,20,20
-    :align: left    
-
     2021 , 6D input                 , "RepRap Ltd.               
     ", "`link <https://github.com/RepRapLtd/6DInput/tree/main/RepRapLtd#update-3>`__ 
     ", |6DInput| , "investigation phase 
