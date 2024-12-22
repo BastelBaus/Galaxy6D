@@ -19,6 +19,8 @@ Full 6D DIY projects
     ", |Spacefox1| |Spacefox2|, finished w/ video , "Stewart platform made from potentiometers
     ", 3D prints & cuts from triplex 
 
+This is some text
+
 ..  csv-table:: 
     :header: started, name, author, link, picture, status, "detection and electronics", mechanics
     :widths: 5, 10,10,10,25,15,20,20
@@ -30,6 +32,7 @@ Full 6D DIY projects
     ", "inductance to digital sensors for distance to w/ metal object as Stewart platform
     ", "3D print (included printed spring mechanism)"
 
+This is some text
 
 ..  csv-table:: 
     :header: started, name, author, link, picture, status, "detection and electronics", mechanics
