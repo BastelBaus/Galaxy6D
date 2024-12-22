@@ -28,7 +28,7 @@ Full 6D DIY projects
     ", "`link <https://hackaday.io/project/187172-os3m-mouse>`__ 
     ", |OS3MMouse| , "in development 
     ", "inductance to digital sensors for distance to w/ metal object as Stewart platform
-    ", 3D print - included printed spring mechanism
+    ", "3D print (included printed spring mechanism)"
 
 
 ..  csv-table:: 
