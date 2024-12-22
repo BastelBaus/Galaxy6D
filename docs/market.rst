@@ -37,6 +37,12 @@ Full 6D DIY projects
     ", "`link <http://valentinheun.com/portfolio/6d/>`__
     ", |axsotic|,  start of a startup which is no longer existing  , "? 
     ", 3D printed ?
+
+..  csv-table:: 
+    :header: started, name, author, link, picture, status, "detection and electronics", mechanics
+    :widths: 5, 10,10,10,25,15,20,20
+    :align: left    
+    
     2021 , 6D input                 , "RepRap Ltd.               
     ", "`link <https://github.com/RepRapLtd/6DInput/tree/main/RepRapLtd#update-3>`__ 
     ", |6DInput| , "investigation phase 
