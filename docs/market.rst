@@ -11,7 +11,7 @@ Full 6D DIY projects
 
     2016 , 
     ","`link <https://github.com/pepijndevos/spacefox>`__  `video <https://www.youtube.com/watch?v=rLTWWPftyac>`__ 
-    ","|Spacefox1| |Spacefox2|", "finished w/ video" , "Stewart platform made from potentiometers
+    ","|Spacefox1| |Spacefox2|", "
     ", 
 
 
@@ -21,7 +21,8 @@ Full 6D DIY projects
     :align: left   
 
     2016 , Spacefox                 , "Pepijn de Vos             
-    ", 3,4, 5 ,"6
+    ", 3,4, "finished w/ video
+    " , "Stewart platform made from potentiometers
     ", 3D prints & cuts from triplex 
 
 This is some text
