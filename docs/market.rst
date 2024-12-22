@@ -9,11 +9,6 @@ Last update Sep/2023. Refer also to `hackaday.io <https://hackaday.io/pages/1354
 Full 6D DIY projects
 ----------------------------------------------
 
-    2016 , 
-    ","`link <https://github.com/pepijndevos/spacefox>`__  `video <https://www.youtube.com/watch?v=rLTWWPftyac>`__ 
-    ","|Spacefox1| |Spacefox2|", "
-    ", 
-
 
 ..  csv-table:: 
     :header: started, name, author, link, picture, status, "detection and electronics", mechanics
@@ -21,7 +16,8 @@ Full 6D DIY projects
     :align: left   
 
     2016 , Spacefox                 , "Pepijn de Vos             
-    ", 3,4, "finished w/ video
+    ", "`link <https://github.com/pepijndevos/spacefox>`__  `video <https://www.youtube.com/watch?v=rLTWWPftyac>`__
+    ", "|Spacefox1| |Spacefox2|", "finished w/ video
     " , "Stewart platform made from potentiometers
     ", 3D prints & cuts from triplex 
 
